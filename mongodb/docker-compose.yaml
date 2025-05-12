@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+
+  mongodb:
+    image: mongo:8.0.9
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_user
+      MONGO_INITDB_ROOT_PASSWORD: mongo_pass
+    volumes:
+      - mongo_data:/data/db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mongodb.rule=Host(`mongodb.localhost`)"
+      - "traefik.http.routers.mongodb.entrypoints=web"
+      - "traefik.http.routers.mongodb.service=mongodb"
+      - "traefik.http.services.mongodb.loadbalancer.server.port=27017"
+    restart: unless-stopped
+    networks:
+      - traefik   
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: mongo_user
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mongo_pass
+      ME_CONFIG_MONGODB_URL: mongodb://mongo_user:mongo_pass@mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mongo-express.rule=Host(`mongo-express.localhost`)"
+      - "traefik.http.routers.mongo-express.entrypoints=web"
+      - "traefik.http.routers.mongo-express.service=mongo-express"
+      - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
+    restart: unless-stopped
+    networks:
+      - traefik
+
+volumes:
+  mongo_data:
+
+networks:
+  traefik:
+    name: traefik-net
+    external: true
