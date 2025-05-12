@@ -9,7 +9,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: mongo_user
       MONGO_INITDB_ROOT_PASSWORD: mongo_pass
     volumes:
-      - mongo_data:/data/db
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.mongodb.rule=Host(`mongodb.localhost`)"
@@ -40,7 +41,8 @@ services:
       - traefik
 
 volumes:
-  mongo_data:
+  mongo-data:
+  mongo-config:
 
 networks:
   traefik:
