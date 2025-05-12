@@ -1,0 +1,49 @@
+services:
+  aim-server:
+    image: aimstack/aim:3.28.0
+    container_name: aim-server
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aim-server.rule=Host(`aim-server.localhost`)"
+      - "traefik.http.routers.aim-server.entrypoints=web"
+      - "traefik.http.routers.aim-server.service=aim-server"
+      - "traefik.http.services.aim-server.loadbalancer.server.port=53800"
+    command:
+      - "server"
+      - "--repo"
+      - "/opt/aim/.aim"
+    volumes:
+      - aim-data:/opt/aim/.aim
+    restart: unless-stopped
+    networks:
+      - traefik
+
+  aim-ui:
+    image: aimstack/aim:3.28.0
+    container_name: aim-ui
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aim-ui.rule=Host(`aim-ui.localhost`)"
+      - "traefik.http.routers.aim-ui.entrypoints=web"
+      - "traefik.http.routers.aim-ui.service=aim-ui"
+      - "traefik.http.services.aim-ui.loadbalancer.server.port=43800"
+    command:
+      - "up"
+      - "--repo"
+      - "/opt/aim/.aim"
+      - "--host"
+      - "0.0.0.0"
+    volumes:
+      - aim-data:/opt/aim/.aim
+    restart: unless-stopped
+    networks:
+      - traefik
+
+
+volumes:
+  aim-data:
+
+networks:
+  traefik:
+    name: traefik-net
+    external: true
