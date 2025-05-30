@@ -5,22 +5,23 @@ services:
     environment:
       MINIO_ROOT_USER: minio_user
       MINIO_ROOT_PASSWORD: minio_pass
+      MINIO_BROWSER_REDIRECT_URL: http://minio.localhost
     volumes:
       - minio-data:/data
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.minio.rule=Host(`minio.localhost`)"
-      - "traefik.http.routers.minio.entrypoints=web"
-      - "traefik.http.routers.minio.service=minio"
-      - "traefik.http.services.minio.loadbalancer.server.port=9000"
-      - "traefik.http.routers.minio-console.rule=Host(`minio-console.localhost`)"
-      - "traefik.http.routers.minio-console.entrypoints=web"
-      - "traefik.http.routers.minio-console.service=minio-console"
-      - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
+      - traefik.enable=true
+      - traefik.http.routers.minio.rule=Host(`minio.localhost`)
+      - traefik.http.routers.minio.entrypoints=web
+      - traefik.http.routers.minio.service=minio
+      - traefik.http.services.minio.loadbalancer.server.port=9001
+      - traefik.http.routers.minio-api.rule=Host(`minio-api.localhost`)
+      - traefik.http.routers.minio-api.entrypoints=web
+      - traefik.http.routers.minio-api.service=minio-api
+      - traefik.http.services.minio-api.loadbalancer.server.port=9000
     restart: unless-stopped
     networks:
       - traefik
-    command: server /data --console-address ":9001" 
+    command: server /data --console-address ":9001" --address ":9000"
 
 volumes:
   minio-data:
